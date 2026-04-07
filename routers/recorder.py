@@ -61,8 +61,12 @@ async def upload_audio(
         logger.info("🧠 Iniciando transcrição...")
         transcription = transcriber.transcribe(file_location, config=config)
 
+        if transcription.status == aai.TranscriptStatus.error:
+            logger.error(f"AssemblyAI Error: {transcription.error}")
+            raise HTTPException(status_code=400, detail=f"Falha na transcrição: {transcription.error}")
+
         if not transcription or not transcription.text:
-            raise HTTPException(status_code=400, detail="Falha na transcrição do áudio.")
+            raise HTTPException(status_code=400, detail="Falha na transcrição do áudio: Nenhum texto detectado.")
 
         text = transcription.text
 
