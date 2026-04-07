@@ -16,7 +16,12 @@ webhook_secret = os.getenv("STRIPE_WEBHOOK_SECRET")
 # Initialize Supabase (with Service Role Key to bypass RLS and update profiles)
 supabase_url = os.getenv("SUPABASE_URL")
 supabase_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
-supabase: Client = create_client(supabase_url, supabase_key) if supabase_url and supabase_key else None
+supabase: Client | None = None
+if supabase_url and supabase_key:
+    try:
+        supabase = create_client(supabase_url, supabase_key)
+    except Exception as e:
+        print(f"Warning: Failed to initialize Supabase client: {e}")
 
 class CheckoutSessionRequest(BaseModel):
     plan_id: str
