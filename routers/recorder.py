@@ -8,6 +8,7 @@ from openai import OpenAI
 from sqlalchemy.orm import Session
 from models import Record
 import assemblyai as aai
+import tempfile
 
 aai.settings.api_key = os.getenv("ASSEMBLY_API_KEY")
 
@@ -44,10 +45,9 @@ async def upload_audio(
     db: Session = Depends(get_db)
 ):
     try:
-        file_location = f"temp_{file.filename}"
-
-        with open(file_location, "wb") as f:
-            f.write(await file.read())
+        with tempfile.NamedTemporaryFile(delete=False) as tmp:
+            tmp.write(await file.read())
+            file_location = tmp.name
 
         with open(file_location, "rb") as audio:
             transcriber = aai.Transcriber()
