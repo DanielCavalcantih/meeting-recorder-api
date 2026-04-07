@@ -16,6 +16,8 @@ webhook_secret = os.getenv("STRIPE_WEBHOOK_SECRET")
 # Initialize Supabase (with Service Role Key to bypass RLS and update profiles)
 supabase_url = os.getenv("SUPABASE_URL")
 supabase_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+site_url = os.getenv("SITE_URL")    
+
 supabase: Client | None = None
 if supabase_url and supabase_key:
     try:
@@ -44,7 +46,7 @@ async def create_checkout_session(request: CheckoutSessionRequest):
             # For testing with placeholder, use a mock or hardcoded logic
             price_id = "price_mock_premium" if "premium" in request.plan_id.lower() else "price_mock_plus"
 
-        frontend_url = "http://localhost:8080" # Default local URL of pact-talk-ai
+        frontend_url = site_url # Default local URL of pact-talk-ai
 
         # Create Stripe Checkout Session
         checkout_session = stripe.checkout.Session.create(
