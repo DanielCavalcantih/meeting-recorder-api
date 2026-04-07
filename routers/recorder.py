@@ -1,10 +1,12 @@
+from services.auth import get_user
+from services.email import send_email
 import os
 import logging
 import shutil
 import tempfile
 
 from dotenv import load_dotenv
-from fastapi import APIRouter, UploadFile, File, HTTPException
+from fastapi import APIRouter, UploadFile, File, HTTPException, Form, Depends
 from pydantic import BaseModel
 from openai import OpenAI
 import assemblyai as aai
@@ -36,9 +38,12 @@ class ChatMessage(BaseModel):
 
 @router.post("/audio")
 async def upload_audio(
-    file: UploadFile = File(...)
+    file: UploadFile = File(...),
+    canSendEmail: bool = Form(...),
+    user=Depends(get_user)
 ):
     file_location = None
+    email = user.get("email")
 
     try:
         logger.info("📥 Recebendo arquivo de áudio...")
@@ -114,7 +119,7 @@ Regras:
             messages=[
                 {
                     "role": "system",
-                    "content": "Você é um especialista em resumir reuniões corporativas com foco em clareza, objetividade e geração de ações."
+                    "content": "Você é um especialista em resumir reuniões com foco em clareza, objetividade e geração de ações."
                 },
                 {
                     "role": "user",
@@ -126,6 +131,9 @@ Regras:
         result = summary.choices[0].message.content
 
         logger.info("✅ Resumo gerado com sucesso")
+
+        if email and canSendEmail:
+            send_email(email)
 
         return {
             "transcription": text,
