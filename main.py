@@ -2,14 +2,12 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import os
 
-from database import engine
-from models import Base
 from routers import recorder, billing
 
 app = FastAPI()
 site_url = os.getenv("SITE_URL")    
 
-origins = ["*"]
+origins = [site_url] if site_url else ["*"]
 
 app.add_middleware(
     CORSMiddleware,
@@ -18,8 +16,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-Base.metadata.create_all(bind=engine)
 
 app.include_router(recorder.router)
 app.include_router(billing.router)

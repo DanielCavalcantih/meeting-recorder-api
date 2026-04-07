@@ -4,12 +4,8 @@ import shutil
 import tempfile
 
 from dotenv import load_dotenv
-from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
+from fastapi import APIRouter, UploadFile, File, HTTPException
 from pydantic import BaseModel
-from sqlalchemy.orm import Session
-
-from database import SessionLocal
-from models import Record
 from openai import OpenAI
 import assemblyai as aai
 
@@ -34,23 +30,13 @@ router = APIRouter(
     tags=["Recorder"]
 )
 
-# DB
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-
 class ChatMessage(BaseModel):
     message: str
 
 
 @router.post("/audio")
 async def upload_audio(
-    file: UploadFile = File(...),
-    db: Session = Depends(get_db)
+    file: UploadFile = File(...)
 ):
     file_location = None
 
@@ -155,4 +141,3 @@ Regras:
                 logger.info("🧹 Arquivo temporário removido")
             except Exception as cleanup_error:
                 logger.warning(f"Erro ao remover arquivo: {cleanup_error}")
-                
