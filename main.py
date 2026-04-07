@@ -9,7 +9,7 @@ from routers import recorder, billing
 app = FastAPI()
 site_url = os.getenv("SITE_URL")    
 
-origins = [site_url] if site_url else ["*"]
+origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
